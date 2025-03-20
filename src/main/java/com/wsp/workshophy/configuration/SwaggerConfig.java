@@ -16,9 +16,9 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Identity Service API 1.0.0")
+                        .title("Workshophy Service API 1.0.0")
                         .version("1.0.0")
-                        .description("Identity Service API"))
+                        .description("Workshophy Service API"))
                 .addSecurityItem(new SecurityRequirement().addList("JavaInUseSecurityScheme"))
                 .components(new Components()
                         .addSecuritySchemes(

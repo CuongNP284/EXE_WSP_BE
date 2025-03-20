@@ -4,6 +4,7 @@ import com.wsp.workshophy.base.BaseRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

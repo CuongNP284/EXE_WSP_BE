@@ -9,6 +9,7 @@ import com.wsp.workshophy.validator.DobConstraint;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor

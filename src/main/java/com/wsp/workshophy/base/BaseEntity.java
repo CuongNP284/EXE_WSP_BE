@@ -28,7 +28,7 @@ public class BaseEntity {
     public String updatedBy;
 
     @Column(name = "ACTIVE")
-    public Boolean active;
+    public Boolean active = true;
 
     @Column(name = "VERSION")
     public Long version;

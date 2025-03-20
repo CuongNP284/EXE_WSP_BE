@@ -38,13 +38,13 @@ public class ApplicationInitConfig {
     static final String ORGANIZER_USER_NAME = "organizer";
 
     @NonFinal
-    static final String ADMIN_PASSWORD = "admin";
+    static final String ADMIN_PASSWORD = "123456789";
 
     @NonFinal
-    static final String CUSTOMER_PASSWORD = "cutomer";
+    static final String CUSTOMER_PASSWORD = "123456789";
 
     @NonFinal
-    static final String ORGANIZER_PASSWORD = "organizer";
+    static final String ORGANIZER_PASSWORD = "123456789";
 
     @Bean
     @ConditionalOnProperty(
@@ -65,6 +65,12 @@ public class ApplicationInitConfig {
                         .username(ADMIN_USER_NAME)
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
                         .lastName("admin")
+                        .email("admin@gmail.com")
+                        .dob(java.time.LocalDate.parse("2004-08-02"))
+                        .street("123")
+                        .city("HCM")
+                        .district("1")
+                        .ward("1")
                         .firstName("admin")
                         .roles(roles)
                         .build();
@@ -83,6 +89,12 @@ public class ApplicationInitConfig {
                         .password(passwordEncoder.encode(CUSTOMER_PASSWORD))
                         .lastName("customer")
                         .firstName("customer")
+                        .email("customer@gmail.com")
+                        .dob(java.time.LocalDate.parse("2004-08-02"))
+                        .street("123")
+                        .city("HCM")
+                        .district("1")
+                        .ward("1")
                         .roles(roles)
                         .build();
                 userRepository.save(customer);
@@ -100,6 +112,12 @@ public class ApplicationInitConfig {
                         .password(passwordEncoder.encode(ORGANIZER_PASSWORD))
                         .lastName("organizer")
                         .firstName("organizer")
+                        .email("organizer@gmail.com")
+                        .dob(java.time.LocalDate.parse("2004-08-02"))
+                        .street("123")
+                        .city("HCM")
+                        .district("1")
+                        .ward("1")
                         .roles(roles)
                         .build();
                 userRepository.save(organizer);

@@ -58,39 +58,70 @@ public class UserService {
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
+        log.info("Name: {}", name);
 
-        User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByEmailAndActive(name, true).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return userMapper.toUserResponse(user);
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByIdAndActive(userId, true)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        userMapper.updateUser(user, request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        // Update only if values are provided
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getFirstName() != null && !request.getFirstName().isEmpty()) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null && !request.getLastName().isEmpty()) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
+        if (request.getStreet() != null && !request.getStreet().isEmpty()) {
+            user.setStreet(request.getStreet());
+        }
+        if (request.getCity() != null && !request.getCity().isEmpty()) {
+            user.setCity(request.getCity());
+        }
+        if (request.getDistrict() != null && !request.getDistrict().isEmpty()) {
+            user.setDistrict(request.getDistrict());
+        }
+        if (request.getWard() != null && !request.getWard().isEmpty()) {
+            user.setWard(request.getWard());
+        }
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            var roles = roleRepository.findAllById(request.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
 
-        var roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-
+        // Save and return updated user response
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
-        userRepository.deleteById(userId);
+        User user = userRepository.findByIdAndActive(userId, true)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setActive(false);
+        userRepository.save(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
         log.info("In method get Users");
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+        return userRepository.findAllByActive(true).stream().map(userMapper::toUserResponse).toList();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(
-                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
+                userRepository.findByIdAndActive(id, true).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 }

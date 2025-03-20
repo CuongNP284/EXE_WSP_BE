@@ -5,7 +5,7 @@ server:
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/workshophy_db}
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/wsp_db}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     password: '#NPCuong0208'
     username: ${DBMS_USERNAME:root}

@@ -8,11 +8,11 @@
 		<version>3.2.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.devteria</groupId>
-	<artifactId>identity-service</artifactId>
-	<name>identity-service</name>
+	<groupId>com.wsp</groupId>
+	<artifactId>workshophy-service</artifactId>
+	<name>workshophy-service</name>
 	<version>0.0.1</version>
-	<description>Identity service</description>
+	<description>Workshophy Service</description>
 	<properties>
 		<java.version>23</java.version>
 		<projectlombok-lombok.version>1.18.30</projectlombok-lombok.version>
