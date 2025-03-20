@@ -16,6 +16,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByIdAndActive(String id, Boolean active);
 
     List<User> findAllByActive(Boolean active);
-    
+
     Optional<User> findByEmailAndActive(String email, Boolean active);
 }
