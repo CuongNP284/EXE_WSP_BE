@@ -4,11 +4,13 @@ import com.wsp.workshophy.constant.PredefinedRole;
 import com.wsp.workshophy.dto.request.UserCreationRequest;
 import com.wsp.workshophy.dto.request.UserUpdateRequest;
 import com.wsp.workshophy.dto.response.UserResponse;
+import com.wsp.workshophy.entity.Address;
 import com.wsp.workshophy.entity.Role;
 import com.wsp.workshophy.entity.User;
 import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
 import com.wsp.workshophy.mapper.UserMapper;
+import com.wsp.workshophy.repository.AddressRepository;
 import com.wsp.workshophy.repository.RoleRepository;
 import com.wsp.workshophy.repository.UserRepository;
 import lombok.AccessLevel;
@@ -31,12 +33,22 @@ import java.util.List;
 @Slf4j
 public class UserService {
     UserRepository userRepository;
+    AddressRepository addressRepository;
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = initializeNewUser(request);
+
+        // Create and set address
+        Address address = Address.builder()
+                .street(request.getStreet())
+                .city(request.getCity())
+                .district(request.getDistrict())
+                .ward(request.getWard())
+                .build();
+        user.setAddress(address);
 
         try {
             return saveAndMapUser(user);
@@ -56,7 +68,30 @@ public class UserService {
     @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = findActiveUserById(userId);
-        updateUserFields(user, request);
+
+        // Update user basic fields
+        userMapper.updateUserFromRequest(request, user);
+
+        // Update password if present
+        updateIfPresent(request.getPassword(),
+                password -> user.setPassword(passwordEncoder.encode(password)));
+
+        // Update address if any field is present
+        Address address = user.getAddress();
+        if (address == null) {
+            address = new Address();
+            user.setAddress(address);
+        }
+        updateIfPresent(request.getStreet(), address::setStreet);
+        updateIfPresent(request.getCity(), address::setCity);
+        updateIfPresent(request.getDistrict(), address::setDistrict);
+        updateIfPresent(request.getWard(), address::setWard);
+
+        // Update roles if present
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            user.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles())));
+        }
+
         return saveAndMapUser(user);
     }
 
@@ -64,6 +99,7 @@ public class UserService {
     public void deleteUser(String userId) {
         User user = findActiveUserById(userId);
         deactivateUser(user);
+        // Address will be automatically deleted due to cascade = CascadeType.ALL
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -92,21 +128,6 @@ public class UserService {
         return user;
     }
 
-    private void updateUserFields(User user, UserUpdateRequest request) {
-        updateIfPresent(request.getPassword(), password -> user.setPassword(passwordEncoder.encode(password)));
-        updateIfPresent(request.getFirstName(), user::setFirstName);
-        updateIfPresent(request.getLastName(), user::setLastName);
-        updateIfPresent(request.getDob(), user::setDob);
-        updateIfPresent(request.getStreet(), user::setStreet);
-        updateIfPresent(request.getCity(), user::setCity);
-        updateIfPresent(request.getDistrict(), user::setDistrict);
-        updateIfPresent(request.getWard(), user::setWard);
-
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            user.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles())));
-        }
-    }
-
     private <T> void updateIfPresent(T value, java.util.function.Consumer<T> setter) {
         if (value != null && (!(value instanceof String) || !((String) value).isEmpty())) {
             setter.accept(value);
@@ -133,6 +154,12 @@ public class UserService {
 
     private void deactivateUser(User user) {
         user.setActive(false);
+
+        Address address = user.getAddress();
+        if (address != null) {
+            address.setActive(false);
+        }
+
         userRepository.save(user);
     }
 }

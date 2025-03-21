@@ -19,6 +19,7 @@ public class UserResponse extends BaseRepsonse {
     String firstName;
     String lastName;
     LocalDate dob;
+
     String street;
     String city;
     String district;

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.wsp.workshophy.constant.PredefinedRole;
+import com.wsp.workshophy.entity.Address; // Thêm import cho Address
 import com.wsp.workshophy.entity.Role;
 import com.wsp.workshophy.entity.User;
 import com.wsp.workshophy.repository.RoleRepository;
@@ -54,6 +55,7 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         log.info("Initializing application.....");
         return args -> {
+            // Khởi tạo Admin
             if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
                 Role adminRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ADMIN_ROLE)
@@ -61,22 +63,31 @@ public class ApplicationInitConfig {
                         .build());
                 var roles = new HashSet<Role>();
                 roles.add(adminRole);
+
+                // Tạo Address cho Admin
+                Address adminAddress = Address.builder()
+                        .street("123 Admin Street")
+                        .city("Admin City")
+                        .district("Admin District")
+                        .ward("Admin Ward")
+                        .build();
+
                 User admin = User.builder()
                         .username(ADMIN_USER_NAME)
                         .password(passwordEncoder.encode(ADMIN_PASSWORD))
                         .lastName("admin")
                         .email("admin@gmail.com")
                         .dob(java.time.LocalDate.parse("2004-08-02"))
-                        .street("123")
-                        .city("HCM")
-                        .district("1")
-                        .ward("1")
                         .firstName("admin")
                         .roles(roles)
+                        .address(adminAddress) // Gắn Address vào User
                         .build();
+
                 userRepository.save(admin);
                 log.warn("admin user has been created with default password: admin, please change it");
             }
+
+            // Khởi tạo Customer
             if (userRepository.findByUsername(CUSTOMER_USER_NAME).isEmpty()) {
                 Role customerRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.CUSTOMER_ROLE)
@@ -84,6 +95,15 @@ public class ApplicationInitConfig {
                         .build());
                 var roles = new HashSet<Role>();
                 roles.add(customerRole);
+
+                // Tạo Address cho Customer
+                Address customerAddress = Address.builder()
+                        .street("456 Customer Street")
+                        .city("Customer City")
+                        .district("Customer District")
+                        .ward("Customer Ward")
+                        .build();
+
                 User customer = User.builder()
                         .username(CUSTOMER_USER_NAME)
                         .password(passwordEncoder.encode(CUSTOMER_PASSWORD))
@@ -91,15 +111,15 @@ public class ApplicationInitConfig {
                         .firstName("customer")
                         .email("customer@gmail.com")
                         .dob(java.time.LocalDate.parse("2004-08-02"))
-                        .street("123")
-                        .city("HCM")
-                        .district("1")
-                        .ward("1")
                         .roles(roles)
+                        .address(customerAddress) // Gắn Address vào User
                         .build();
+
                 userRepository.save(customer);
-                log.warn("customer user has been created with default password: cutomer, please change it");
+                log.warn("customer user has been created with default password: customer, please change it");
             }
+
+            // Khởi tạo Organizer
             if (userRepository.findByUsername(ORGANIZER_USER_NAME).isEmpty()) {
                 Role organizerRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ORGANIZER_ROLE)
@@ -107,6 +127,15 @@ public class ApplicationInitConfig {
                         .build());
                 var roles = new HashSet<Role>();
                 roles.add(organizerRole);
+
+                // Tạo Address cho Organizer
+                Address organizerAddress = Address.builder()
+                        .street("789 Organizer Street")
+                        .city("Organizer City")
+                        .district("Organizer District")
+                        .ward("Organizer Ward")
+                        .build();
+
                 User organizer = User.builder()
                         .username(ORGANIZER_USER_NAME)
                         .password(passwordEncoder.encode(ORGANIZER_PASSWORD))
@@ -114,15 +143,14 @@ public class ApplicationInitConfig {
                         .firstName("organizer")
                         .email("organizer@gmail.com")
                         .dob(java.time.LocalDate.parse("2004-08-02"))
-                        .street("123")
-                        .city("HCM")
-                        .district("1")
-                        .ward("1")
                         .roles(roles)
+                        .address(organizerAddress) // Gắn Address vào User
                         .build();
+
                 userRepository.save(organizer);
                 log.warn("organizer user has been created with default password: organizer, please change it");
             }
+
             log.info("Application initialization completed .....");
         };
     }

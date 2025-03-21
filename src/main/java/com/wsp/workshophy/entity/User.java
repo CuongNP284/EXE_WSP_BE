@@ -33,10 +33,9 @@ public class User extends BaseEntity {
     LocalDate dob;
     String lastName;
 
-    String street;
-    String city;
-    String district;
-    String ward;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id")
+    Address address;
 
     @ManyToMany
     Set<Role> roles;
