@@ -56,7 +56,7 @@ public class ApplicationInitConfig {
         log.info("Initializing application.....");
         return args -> {
             // Khởi tạo Admin
-            if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
+            if (userRepository.findByUsernameAndActive(ADMIN_USER_NAME, true).isEmpty()) {
                 Role adminRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ADMIN_ROLE)
                         .description("Admin role")
@@ -88,7 +88,7 @@ public class ApplicationInitConfig {
             }
 
             // Khởi tạo Customer
-            if (userRepository.findByUsername(CUSTOMER_USER_NAME).isEmpty()) {
+            if (userRepository.findByUsernameAndActive(CUSTOMER_USER_NAME, true).isEmpty()) {
                 Role customerRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.CUSTOMER_ROLE)
                         .description("Customer role")
@@ -120,7 +120,7 @@ public class ApplicationInitConfig {
             }
 
             // Khởi tạo Organizer
-            if (userRepository.findByUsername(ORGANIZER_USER_NAME).isEmpty()) {
+            if (userRepository.findByUsernameAndActive(ORGANIZER_USER_NAME, true).isEmpty()) {
                 Role organizerRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ORGANIZER_ROLE)
                         .description("Organizer role")

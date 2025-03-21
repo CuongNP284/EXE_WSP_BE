@@ -11,7 +11,7 @@ import com.wsp.workshophy.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameAndActive(String username, Boolean active);
 
     Optional<User> findByIdAndActive(String id, Boolean active);
 
