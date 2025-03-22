@@ -122,8 +122,9 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<Role> roles = new HashSet<>();
-        roleRepository.findById(PredefinedRole.CUSTOMER_ROLE)
-                .ifPresent(roles::add);
+        String roleName = (request.getRole() != null) ? request.getRole().getName() : PredefinedRole.CUSTOMER_ROLE;
+
+        roleRepository.findById(roleName).ifPresent(roles::add);
         user.setRoles(roles);
 
         return user;

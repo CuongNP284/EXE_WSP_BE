@@ -20,7 +20,7 @@ import java.util.List;
 public class PostController {
     PostService postService;
 
-    @PostMapping("/create")
+    @PostMapping("/createAPost")
     ApiResponse<PostResponse> createPost(@RequestBody PostCreationRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .result(postService.createPost(request))
@@ -28,7 +28,7 @@ public class PostController {
                 .build();
     }
 
-    @GetMapping("/all")
+    @GetMapping("/getAllApprovedPosts")
     ApiResponse<List<PostResponse>> getAllApprovedPosts() {
         return ApiResponse.<List<PostResponse>>builder()
                 .result(postService.getAllApprovedPosts())

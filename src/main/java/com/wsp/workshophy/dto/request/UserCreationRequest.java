@@ -1,8 +1,10 @@
 package com.wsp.workshophy.dto.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.wsp.workshophy.base.BaseRequest;
+import com.wsp.workshophy.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -41,4 +43,6 @@ public class UserCreationRequest extends BaseRequest {
     String city;
     String district;
     String ward;
+
+    RoleRequest role;
 }
