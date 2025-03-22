@@ -30,7 +30,6 @@ public class BaseRepsonse implements Serializable {
     @JsonIgnore
     public String updatedBy;
 
-    @JsonIgnore
     @JsonSerialize(using = DateToTimestamp.class)
     @JsonDeserialize(using = TimestampToDate.class)
     public LocalDateTime createdDate;
