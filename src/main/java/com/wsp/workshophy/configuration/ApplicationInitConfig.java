@@ -1,7 +1,10 @@
 package com.wsp.workshophy.configuration;
 
 import java.util.HashSet;
+import java.util.List;
 
+import com.wsp.workshophy.entity.WorkshopCategory;
+import com.wsp.workshophy.repository.WorkshopCategoryRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -52,7 +55,7 @@ public class ApplicationInitConfig {
             prefix = "spring",
             value = "datasource.driverClassName",
             havingValue = "com.mysql.cj.jdbc.Driver")
-    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository, WorkshopCategoryRepository workshopCategoryRepository) {
         log.info("Initializing application.....");
         return args -> {
             // Khởi tạo Admin
@@ -84,7 +87,6 @@ public class ApplicationInitConfig {
                         .build();
 
                 userRepository.save(admin);
-                log.warn("admin user has been created with default password: admin, please change it");
             }
 
             // Khởi tạo Customer
@@ -116,7 +118,6 @@ public class ApplicationInitConfig {
                         .build();
 
                 userRepository.save(customer);
-                log.warn("customer user has been created with default password: customer, please change it");
             }
 
             // Khởi tạo Organizer
@@ -148,7 +149,53 @@ public class ApplicationInitConfig {
                         .build();
 
                 userRepository.save(organizer);
-                log.warn("organizer user has been created with default password: organizer, please change it");
+            }
+            List<String> predefinedCategories = List.of(
+                    "Kinh doanh",
+                    "Khởi nghiệp",
+                    "Công nghệ",
+                    "Lập trình",
+                    "Thiết kế",
+                    "Đồ họa",
+                    "Ngoại ngữ",
+                    "Tiếng Anh",
+                    "Tiếng Nhật",
+                    "Tiếng Hàn",
+                    "Tiếng Trung",
+                    "Marketing",
+                    "Truyền thông",
+                    "Quản trị",
+                    "Phát triển bản thân",
+                    "Kỹ năng mềm",
+                    "Sáng tạo",
+                    "Học thuật",
+                    "Giáo dục",
+                    "Chăm sóc trẻ",
+                    "Tài chính",
+                    "Đầu tư",
+                    "Thể thao",
+                    "Yoga",
+                    "Âm nhạc",
+                    "Hội họa",
+                    "Nghệ thuật",
+                    "Thời trang",
+                    "Ẩm thực",
+                    "Du lịch",
+                    "Sức khỏe",
+                    "Tâm lý",
+                    "Làm đẹp",
+                    "Phong thủy",
+                    "Giải trí",
+                    "Thư giãn"
+            );
+
+            for (String categoryName : predefinedCategories) {
+                if (workshopCategoryRepository.findByNameAndActive(categoryName, true).isEmpty()) {
+                    WorkshopCategory category = WorkshopCategory.builder()
+                            .name(categoryName)
+                            .build();
+                    workshopCategoryRepository.save(category);
+                }
             }
 
             log.info("Application initialization completed .....");

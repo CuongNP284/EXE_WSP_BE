@@ -1,4 +1,4 @@
-package com.wsp.workshophy.dto.request;
+package com.wsp.workshophy.dto.request.User;
 
 import java.time.LocalDate;
 import java.util.List;

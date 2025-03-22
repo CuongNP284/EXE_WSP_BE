@@ -39,4 +39,7 @@ public class User extends BaseEntity {
 
     @ManyToMany
     Set<Role> roles;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    OrganizerProfile organizerProfile;
 }

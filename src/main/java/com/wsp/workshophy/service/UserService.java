@@ -1,8 +1,8 @@
 package com.wsp.workshophy.service;
 
 import com.wsp.workshophy.constant.PredefinedRole;
-import com.wsp.workshophy.dto.request.UserCreationRequest;
-import com.wsp.workshophy.dto.request.UserUpdateRequest;
+import com.wsp.workshophy.dto.request.User.UserCreationRequest;
+import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
 import com.wsp.workshophy.dto.response.UserResponse;
 import com.wsp.workshophy.entity.Address;
 import com.wsp.workshophy.entity.Role;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor

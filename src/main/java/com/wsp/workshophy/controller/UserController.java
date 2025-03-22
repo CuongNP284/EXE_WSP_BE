@@ -7,8 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.wsp.workshophy.dto.request.ApiResponse;
-import com.wsp.workshophy.dto.request.UserCreationRequest;
-import com.wsp.workshophy.dto.request.UserUpdateRequest;
+import com.wsp.workshophy.dto.request.User.UserCreationRequest;
+import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
 import com.wsp.workshophy.dto.response.UserResponse;
 import com.wsp.workshophy.service.UserService;
 

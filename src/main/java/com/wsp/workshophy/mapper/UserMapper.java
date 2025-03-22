@@ -4,8 +4,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import com.wsp.workshophy.dto.request.UserCreationRequest;
-import com.wsp.workshophy.dto.request.UserUpdateRequest;
+import com.wsp.workshophy.dto.request.User.UserCreationRequest;
+import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
 import com.wsp.workshophy.dto.response.UserResponse;
 import com.wsp.workshophy.entity.User;
 

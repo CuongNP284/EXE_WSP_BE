@@ -1,6 +1,6 @@
 package com.wsp.workshophy.dto.response;
 
-import com.wsp.workshophy.base.BaseRepsonse;
+import com.wsp.workshophy.base.BaseEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RoleResponse{
+public class WorkshopCategoryResponse{
+    Long id;
     String name;
-    String description;
 }

@@ -19,6 +19,10 @@ public enum ErrorCode {
     POST_NOT_FOUND(1009, "Post not existed", HttpStatus.NOT_FOUND),
     POST_NOT_AVAILABLE(1010, "Post is not available", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL(1011, "Email is invalid", HttpStatus.BAD_REQUEST),
+    ORGANIZER_PROFILE_NOT_FOUND(1012, "Organizer profile not found", HttpStatus.NOT_FOUND),
+    ORGANIZER_PROFILE_ALREADY_EXISTS(1013, "Organizer profile already exists for this user", HttpStatus.BAD_REQUEST),
+    USER_NOT_ORGANIZER(1014, "User does not have ORGANIZER role", HttpStatus.BAD_REQUEST),
+    WORKSHOP_CATEGORY_NOT_FOUND(1015, "Workshop category not found", HttpStatus.NOT_FOUND),;
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
