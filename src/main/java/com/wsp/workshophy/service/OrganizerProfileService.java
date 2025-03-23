@@ -82,6 +82,12 @@ public class OrganizerProfileService {
         return organizerProfileMapper.toOrganizerProfileResponse(organizerProfileRepository.save(organizerProfile));
     }
 
+    public OrganizerProfileResponse getOrganizerProfileByUserId(String userId) {
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByUserIdAndActive(userId, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+        return organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
+    }
+
 
     public List<OrganizerProfileResponse> getAllOrganizerProfiles() {
         return organizerProfileRepository.findAllByActive(true).stream()

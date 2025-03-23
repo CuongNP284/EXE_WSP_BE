@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +60,44 @@ public class UserService {
         } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+    }
+
+    public List<UserResponse> findOrganizersByMatchingCategories() {
+        // Lấy user hiện tại và sở thích của họ
+        User currentUser = getCurrentUser();
+        List<WorkshopCategory> userInterests = currentUser.getInterests();
+
+        if (userInterests == null || userInterests.isEmpty()) {
+            return List.of(); // Trả về danh sách rỗng nếu user không có sở thích
+        }
+
+        // Lấy tất cả user có role ORGANIZER và có OrganizerProfile
+        List<User> organizers = userRepository.findAll().stream()
+                .filter(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE)))
+                .filter(user -> user.getOrganizerProfile() != null)
+                .collect(Collectors.toList());
+
+        // Lọc các organizer có category trùng với sở thích của user hiện tại
+        Set<Long> userInterestIds = userInterests.stream()
+                .map(WorkshopCategory::getId)
+                .collect(Collectors.toSet());
+
+        List<User> matchingOrganizers = organizers.stream()
+                .filter(organizer -> {
+                    List<WorkshopCategory> organizerCategories = organizer.getOrganizerProfile().getCategories();
+                    if (organizerCategories == null || organizerCategories.isEmpty()) {
+                        return false;
+                    }
+                    return organizerCategories.stream()
+                            .anyMatch(category -> userInterestIds.contains(category.getId()));
+                })
+                .toList();
+
+        // Chuyển đổi sang UserResponse
+        return matchingOrganizers.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     public UserResponse getMyInfo() {

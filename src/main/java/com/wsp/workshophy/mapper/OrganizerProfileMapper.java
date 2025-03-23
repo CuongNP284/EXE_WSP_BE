@@ -2,13 +2,11 @@ package com.wsp.workshophy.mapper;
 
 
 import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileCreationRequest;
-import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileUpdateRequest;
 import com.wsp.workshophy.dto.response.OrganizerProfileResponse;
 import com.wsp.workshophy.entity.OrganizerProfile;
 import com.wsp.workshophy.entity.WorkshopCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.time.LocalDate;
@@ -24,6 +22,7 @@ public interface OrganizerProfileMapper {
     @Mapping(source = "user.username", target = "username")
     @Mapping(source = "categories", target = "categoryNames", qualifiedByName = "mapCategoriesToNames")
     @Mapping(source = "establishmentDate", target = "tenure", qualifiedByName = "calculateTenure")
+    @Mapping(source = "user.id", target = "userId")
     OrganizerProfileResponse toOrganizerProfileResponse(OrganizerProfile organizerProfile);
 
 

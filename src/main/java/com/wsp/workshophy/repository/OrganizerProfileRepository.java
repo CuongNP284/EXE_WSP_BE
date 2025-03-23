@@ -3,6 +3,8 @@ package com.wsp.workshophy.repository;
 import com.wsp.workshophy.entity.OrganizerProfile;
 import com.wsp.workshophy.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +17,6 @@ public interface OrganizerProfileRepository extends JpaRepository<OrganizerProfi
     List<OrganizerProfile> findAllByActive(Boolean active);
 
     Optional<OrganizerProfile> findByUserAndActive(User user, Boolean active);
+
+    Optional<OrganizerProfile> findByUserIdAndActive(String userId, Boolean active);
 }

@@ -26,4 +26,5 @@ public class OrganizerProfileResponse extends BaseRepsonse {
     LocalDateTime createdDate;
     LocalDate establishmentDate;
     String tenure;
+    String userId;
 }

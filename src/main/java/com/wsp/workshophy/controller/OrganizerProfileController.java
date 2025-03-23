@@ -57,6 +57,15 @@ public class OrganizerProfileController {
                 .build();
     }
 
+    @GetMapping("/getOneByUserId/{userId}")
+    public ApiResponse<OrganizerProfileResponse> getOrganizerProfileByUserId(@PathVariable String userId) {
+        OrganizerProfileResponse result = organizerProfileService.getOrganizerProfileByUserId(userId);
+        return ApiResponse.<OrganizerProfileResponse>builder()
+                .result(result)
+                .message("Organizer profile retrieved successfully")
+                .build();
+    }
+
     @GetMapping("/my-profile")
     public ApiResponse<OrganizerProfileResponse> getMyOrganizerProfile() {
         OrganizerProfileResponse result = organizerProfileService.getMyOrganizerProfile();

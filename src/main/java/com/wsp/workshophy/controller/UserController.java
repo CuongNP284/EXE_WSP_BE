@@ -41,6 +41,14 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/organizers/matching-categories")
+    public ApiResponse<List<UserResponse>> findOrganizersByMatchingCategories() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.findOrganizersByMatchingCategories())
+                .message("Matching organizers retrieved successfully")
+                .build();
+    }
+
     @GetMapping("/getUser/{userId}")
     ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
         return ApiResponse.<UserResponse>builder()

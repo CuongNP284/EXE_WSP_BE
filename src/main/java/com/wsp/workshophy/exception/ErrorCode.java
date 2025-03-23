@@ -22,7 +22,8 @@ public enum ErrorCode {
     ORGANIZER_PROFILE_NOT_FOUND(1012, "Organizer profile not found", HttpStatus.NOT_FOUND),
     ORGANIZER_PROFILE_ALREADY_EXISTS(1013, "Organizer profile already exists for this user", HttpStatus.BAD_REQUEST),
     USER_NOT_ORGANIZER(1014, "User does not have ORGANIZER role", HttpStatus.BAD_REQUEST),
-    WORKSHOP_CATEGORY_NOT_FOUND(1015, "Workshop category not found", HttpStatus.NOT_FOUND),;
+    WORKSHOP_CATEGORY_NOT_FOUND(1015, "Workshop category not found", HttpStatus.NOT_FOUND),
+    INVALID_ID_FORMAT(1016, "Invalid ID format", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
