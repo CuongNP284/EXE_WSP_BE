@@ -3,10 +3,7 @@ package com.wsp.workshophy.service;
 import com.wsp.workshophy.constant.PredefinedRole;
 import com.wsp.workshophy.dto.request.User.UserCreationRequest;
 import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
-import com.wsp.workshophy.dto.response.FollowResponse;
-import com.wsp.workshophy.dto.response.FollowerUsernameResponse;
-import com.wsp.workshophy.dto.response.OrganizerProfileNameResponse;
-import com.wsp.workshophy.dto.response.UserResponse;
+import com.wsp.workshophy.dto.response.*;
 import com.wsp.workshophy.entity.*;
 import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
@@ -38,8 +35,9 @@ public class UserService {
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
-    private final WorkshopCategoryRepository workshopCategoryRepository;
-    private final OrganizerProfileRepository organizerProfileRepository;
+    WorkshopCategoryRepository workshopCategoryRepository;
+    OrganizerProfileRepository organizerProfileRepository;
+    RatingRepository ratingRepository;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = initializeNewUser(request);
@@ -322,6 +320,112 @@ public class UserService {
         user.setInterests(interests);
 
         return user;
+    }
+
+    public RatingResponse rateOrganizerProfile(String organizerUserId, Double rating) {
+        User currentUser = getCurrentUser();
+
+        // Kiểm tra user hiện tại có phải là CUSTOMER
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            throw new AppException(ErrorCode.NOT_CUSTOMER_TO_RATE);
+        }
+
+        // Kiểm tra user được đánh giá có phải là ORGANIZER và có OrganizerProfile
+        User organizer = findActiveUserById(organizerUserId);
+        if (!organizer.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE))) {
+            throw new AppException(ErrorCode.USER_NOT_ORGANIZER);
+        }
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByUserAndActive(organizer, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        // Kiểm tra rating hợp lệ (1-5)
+        if (rating < 1.0 || rating > 5.0) {
+            throw new AppException(ErrorCode.INVALID_RATING);
+        }
+
+        // Kiểm tra xem user đã đánh giá OrganizerProfile này chưa
+        Optional<Rating> existingRating = ratingRepository.findByUserAndOrganizerProfile(currentUser, organizerProfile);
+        Rating ratingEntity;
+        String message;
+
+        if (existingRating.isPresent()) {
+            // Nếu đã đánh giá, cập nhật rating mới
+            ratingEntity = existingRating.get();
+            ratingEntity.setRating(rating);
+        } else {
+            // Nếu chưa đánh giá, tạo rating mới
+            ratingEntity = Rating.builder()
+                    .user(currentUser)
+                    .organizerProfile(organizerProfile)
+                    .rating(rating)
+                    .build();
+            organizerProfile.getRatings().add(ratingEntity);
+        }
+
+        // Lưu rating
+        ratingRepository.save(ratingEntity);
+
+        // Tính lại averageRating
+        updateAverageRating(organizerProfile);
+
+        return RatingResponse.builder()
+                .id(ratingEntity.getId())
+                .username(currentUser.getUsername())
+                .organizerProfileId(organizerProfile.getId())
+                .organizerProfileName(organizerProfile.getName())
+                .rating(rating)
+                .build();
+    }
+
+    public List<UserRatedOrganizerResponse> getRatedOrganizerProfilesByUser() {
+        User currentUser = getCurrentUser();
+
+        // Kiểm tra user hiện tại có phải là CUSTOMER
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            throw new AppException(ErrorCode.NOT_CUSTOMER_TO_VIEW_RATED);
+        }
+
+        List<Rating> ratings = ratingRepository.findByUser(currentUser);
+        return ratings.stream()
+                .map(rating -> UserRatedOrganizerResponse.builder()
+                        .organizerProfileId(rating.getOrganizerProfile().getId())
+                        .organizerProfileName(rating.getOrganizerProfile().getName())
+                        .rating(rating.getRating())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<OrganizerRatedByUserResponse> getRatingsForOrganizerProfile() {
+        User currentUser = getCurrentUser();
+
+        // Kiểm tra user có phải là ORGANIZER và có OrganizerProfile
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE))) {
+            throw new AppException(ErrorCode.USER_NOT_ORGANIZER);
+        }
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByUserAndActive(currentUser, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        List<Rating> ratings = ratingRepository.findByOrganizerProfile(organizerProfile);
+        return ratings.stream()
+                .map(rating -> OrganizerRatedByUserResponse.builder()
+                        .username(rating.getUser().getUsername()) // Thay userId bằng username
+                        .rating(rating.getRating())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private void updateAverageRating(OrganizerProfile organizerProfile) {
+        List<Rating> ratings = ratingRepository.findByOrganizerProfile(organizerProfile);
+        if (ratings.isEmpty()) {
+            organizerProfile.setAverageRating(0.0);
+        } else {
+            double average = ratings.stream()
+                    .mapToDouble(Rating::getRating)
+                    .average()
+                    .orElse(0.0);
+            organizerProfile.setAverageRating(average);
+        }
+        organizerProfileRepository.save(organizerProfile);
     }
 
     private <T> void updateIfPresent(T value, java.util.function.Consumer<T> setter) {

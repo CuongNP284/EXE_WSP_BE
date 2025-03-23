@@ -24,6 +24,7 @@ public class OrganizerProfileResponse extends BaseRepsonse {
     Integer workshopCount;
     List<String> categoryNames;
     String username;
+    Double averageRating;
     LocalDateTime createdDate;
     LocalDate establishmentDate;
     String tenure;

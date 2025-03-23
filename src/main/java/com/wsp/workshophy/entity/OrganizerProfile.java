@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -36,6 +37,9 @@ public class OrganizerProfile extends BaseEntity {
     @Column(name = "follower_count", nullable = false)
     Integer followerCount = 0;
 
+    @Column(name = "average_rating")
+    Double averageRating = 0.0;
+
     @Column(name = "workshop_count")
     Integer workshopCount;
 
@@ -53,4 +57,7 @@ public class OrganizerProfile extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
+
+    @OneToMany(mappedBy = "organizerProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Rating> ratings = new ArrayList<>();
 }

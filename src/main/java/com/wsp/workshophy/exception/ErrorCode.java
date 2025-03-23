@@ -28,6 +28,9 @@ public enum ErrorCode {
     ALREADY_FOLLOWED(1018, "You have already followed this user", HttpStatus.BAD_REQUEST),
     NOT_FOLLOWING_YET(1019, "You have not followed this user yet", HttpStatus.BAD_REQUEST),
     ONLY_CUSTOMER_CAN_VIEW_FOLLOWED_ORGANIZERS(1020, "Only CUSTOMER can view followed organizers", HttpStatus.BAD_REQUEST),
+    NOT_CUSTOMER_TO_RATE(1021, "Only CUSTOMER can rate organizers", HttpStatus.BAD_REQUEST),
+    INVALID_RATING(1022, "Rating must be between 1.0 and 5.0", HttpStatus.BAD_REQUEST),
+    NOT_CUSTOMER_TO_VIEW_RATED(1023, "Only CUSTOMER can view rated organizers", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

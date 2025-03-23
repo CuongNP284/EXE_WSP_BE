@@ -2,9 +2,7 @@ package com.wsp.workshophy.controller;
 
 import java.util.List;
 
-import com.wsp.workshophy.dto.response.FollowResponse;
-import com.wsp.workshophy.dto.response.FollowerUsernameResponse;
-import com.wsp.workshophy.dto.response.OrganizerProfileNameResponse;
+import com.wsp.workshophy.dto.response.*;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import com.wsp.workshophy.dto.request.ApiResponse;
 import com.wsp.workshophy.dto.request.User.UserCreationRequest;
 import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
-import com.wsp.workshophy.dto.response.UserResponse;
 import com.wsp.workshophy.service.UserService;
 
 import lombok.AccessLevel;
@@ -129,6 +126,33 @@ public class UserController {
         return ApiResponse.<List<UserResponse>>builder()
                 .result(result)
                 .message("Users retrieved successfully")
+                .build();
+    }
+
+    @PostMapping("/{organizerUserId}/rate")
+    public ApiResponse<RatingResponse> rateOrganizerProfile(@PathVariable String organizerUserId, @RequestParam Double rating) {
+        RatingResponse result = userService.rateOrganizerProfile(organizerUserId, rating);
+        return ApiResponse.<RatingResponse>builder()
+                .result(result)
+                .message("Organizer profile rated successfully")
+                .build();
+    }
+
+    @GetMapping("/my-rated-organizers")
+    public ApiResponse<List<UserRatedOrganizerResponse>> getRatedOrganizerProfilesByUser() {
+        List<UserRatedOrganizerResponse> result = userService.getRatedOrganizerProfilesByUser();
+        return ApiResponse.<List<UserRatedOrganizerResponse>>builder()
+                .result(result)
+                .message("Rated organizer profiles retrieved successfully")
+                .build();
+    }
+
+    @GetMapping("/my-ratings")
+    public ApiResponse<List<OrganizerRatedByUserResponse>> getRatingsForOrganizerProfile() {
+        List<OrganizerRatedByUserResponse> result = userService.getRatingsForOrganizerProfile();
+        return ApiResponse.<List<OrganizerRatedByUserResponse>>builder()
+                .result(result)
+                .message("Ratings retrieved successfully")
                 .build();
     }
 }
