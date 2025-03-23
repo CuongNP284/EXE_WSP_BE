@@ -17,6 +17,7 @@ public class OrganizerProfileUpdateRequest extends BaseRequest {
     String name;
     String description;
     String theme;
+    String avatar;
     Integer followerCount;
     Integer workshopCount;
     List<String> categoryNames;

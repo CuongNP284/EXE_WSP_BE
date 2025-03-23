@@ -122,6 +122,9 @@ public class UserService {
         updateIfPresent(request.getFirstName(), user::setFirstName);
         updateIfPresent(request.getLastName(), user::setLastName);
         updateIfPresent(request.getDob(), user::setDob);
+        updateIfPresent(request.getAvatar(), user::setAvatar);
+        updateIfPresent(request.getGender(), user::setGender);
+        updateIfPresent(request.getPhoneNumber(), user::setPhoneNumber);
 
         // Update password if present
         updateIfPresent(request.getPassword(),

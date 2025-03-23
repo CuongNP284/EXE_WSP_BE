@@ -65,6 +65,7 @@ public class OrganizerProfileService {
 
         // Chỉ cập nhật các trường nếu chúng có giá trị
         Optional.ofNullable(request.getName()).ifPresent(organizerProfile::setName);
+        Optional.ofNullable(request.getAvatar()).ifPresent(organizerProfile::setAvatar);
         Optional.ofNullable(request.getDescription()).ifPresent(organizerProfile::setDescription);
         Optional.ofNullable(request.getTheme()).ifPresent(organizerProfile::setTheme);
         Optional.ofNullable(request.getFollowerCount()).ifPresent(organizerProfile::setFollowerCount);

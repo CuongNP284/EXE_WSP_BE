@@ -35,6 +35,13 @@ public class User extends BaseEntity {
     LocalDate dob;
     String lastName;
 
+    @Column(name = "avatar")
+    String avatar;
+    @Column(name = "gender")
+    String gender;
+    @Column(name = "phone_number")
+    String phoneNumber;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     Address address;

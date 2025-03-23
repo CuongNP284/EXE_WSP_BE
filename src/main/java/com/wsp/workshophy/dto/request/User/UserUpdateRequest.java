@@ -22,7 +22,9 @@ public class UserUpdateRequest extends BaseRequest {
 
     @DobConstraint(min = 18, message = "INVALID_DOB")
     LocalDate dob;
-
+    String avatar;
+    String gender;
+    String phoneNumber;
     String street;
     String city;
     String district;

@@ -18,6 +18,7 @@ public class OrganizerProfileResponse extends BaseRepsonse {
     Long id;
     String name;
     String description;
+    String avatar;
     String theme;
     Integer followerCount;
     Integer workshopCount;

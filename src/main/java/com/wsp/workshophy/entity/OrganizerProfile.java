@@ -27,6 +27,9 @@ public class OrganizerProfile extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     String description;
 
+    @Column(name = "avatar")
+    String avatar;
+
     @Column(name = "theme")
     String theme;
 

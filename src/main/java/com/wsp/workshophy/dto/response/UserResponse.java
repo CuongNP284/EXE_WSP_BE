@@ -20,7 +20,9 @@ public class UserResponse{
     String firstName;
     String lastName;
     LocalDate dob;
-
+    String avatar;
+    String gender;
+    String phoneNumber;
     String street;
     String city;
     String district;

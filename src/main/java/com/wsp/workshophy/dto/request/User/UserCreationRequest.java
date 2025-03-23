@@ -36,6 +36,10 @@ public class UserCreationRequest extends BaseRequest {
     String firstName;
     String lastName;
 
+    String avatar;
+    String gender;
+    String phoneNumber;
+
     @DobConstraint(min = 18, message = "INVALID_DOB")
     LocalDate dob;
 
