@@ -20,10 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -313,10 +310,12 @@ public class UserService {
         roleRepository.findById(roleName).ifPresent(roles::add);
         user.setRoles(roles);
 
-        // Xử lý sở thích (interests)
-        List<WorkshopCategory> interests = request.getInterestNames().stream()
-                .map(this::findWorkshopCategoryByNameAndActive)
-                .collect(Collectors.toList());
+        // Xử lý sở thích (interests) - Kiểm tra null
+        List<WorkshopCategory> interests = Optional.ofNullable(request.getInterestNames())
+                .map(names -> names.stream()
+                        .map(this::findWorkshopCategoryByNameAndActive)
+                        .collect(Collectors.toList()))
+                .orElse(new ArrayList<>());
         user.setInterests(interests);
 
         return user;

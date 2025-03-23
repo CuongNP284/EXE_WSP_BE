@@ -1,5 +1,6 @@
 package com.wsp.workshophy.service;
 
+import com.wsp.workshophy.constant.PredefinedRole;
 import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileCreationRequest;
 import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileUpdateRequest;
 import com.wsp.workshophy.dto.response.OrganizerProfileResponse;
@@ -20,8 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -103,6 +103,26 @@ public class OrganizerProfileService {
                 .toList();
     }
 
+    public OrganizerProfileResponse getOrganizerProfileForUser(Long id) {
+        // Tìm OrganizerProfile theo id
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByIdAndActive(id, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        // Chuyển đổi sang OrganizerProfileResponse
+        OrganizerProfileResponse response = organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
+
+        // Tìm các OrganizerProfile liên quan
+        List<OrganizerProfile> relatedProfiles = findRelatedOrganizerProfiles(organizerProfile);
+        List<OrganizerProfileResponse> relatedProfileResponses = relatedProfiles.stream()
+                .map(organizerProfileMapper::toOrganizerProfileResponse)
+                .collect(Collectors.toList());
+
+        // Gán danh sách liên quan vào response
+        response.setRelatedProfiles(relatedProfileResponses);
+
+        return response;
+    }
+
     public OrganizerProfileResponse getOrganizerProfile(Long id) {
         OrganizerProfile organizerProfile = findOrganizerProfileByIdAndActive(id);
         return organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
@@ -121,6 +141,31 @@ public class OrganizerProfileService {
         OrganizerProfile organizerProfile = findOrganizerProfileByIdAndActive(id);
         organizerProfile.setActive(false);
         organizerProfileRepository.save(organizerProfile);
+    }
+
+
+
+    private List<OrganizerProfile> findRelatedOrganizerProfiles(OrganizerProfile organizerProfile) {
+        Set<OrganizerProfile> relatedProfiles = new HashSet<>();
+
+        // 1. Tìm các OrganizerProfile có cùng category
+        for (WorkshopCategory category : organizerProfile.getCategories()) {
+            List<OrganizerProfile> profilesByCategory = organizerProfileRepository
+                    .findByCategoryAndActiveTrueAndNotId(category, organizerProfile.getId());
+            relatedProfiles.addAll(profilesByCategory);
+        }
+
+        // 2. Nếu user hiện tại là CUSTOMER, thêm các OrganizerProfile thuộc sở thích của họ
+        User currentUser = getCurrentUser();
+        if (currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            for (WorkshopCategory interest : currentUser.getInterests()) {
+                List<OrganizerProfile> profilesByInterest = organizerProfileRepository
+                        .findByCategoryAndActiveTrueAndNotId(interest, organizerProfile.getId());
+                relatedProfiles.addAll(profilesByInterest);
+            }
+        }
+
+        return new ArrayList<>(relatedProfiles);
     }
 
     private OrganizerProfile findOrganizerProfileByIdAndActive(Long id) {

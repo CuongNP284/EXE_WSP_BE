@@ -48,9 +48,18 @@ public class OrganizerProfileController {
                 .build();
     }
 
-    @GetMapping("/getOne/{id}")
-    public ApiResponse<OrganizerProfileResponse> getOrganizerProfile(@PathVariable Long id) {
+    @GetMapping("/getOneByOrganizer/{id}")
+    public ApiResponse<OrganizerProfileResponse> getOrganizerProfileByOrganizer(@PathVariable Long id) {
         OrganizerProfileResponse result = organizerProfileService.getOrganizerProfile(id);
+        return ApiResponse.<OrganizerProfileResponse>builder()
+                .result(result)
+                .message("Organizer profile retrieved successfully")
+                .build();
+    }
+
+    @GetMapping("/getOneByCustomer/{id}")
+    public ApiResponse<OrganizerProfileResponse> getOrganizerProfileByCustomer(@PathVariable Long id) {
+        OrganizerProfileResponse result = organizerProfileService.getOrganizerProfileForUser(id);
         return ApiResponse.<OrganizerProfileResponse>builder()
                 .result(result)
                 .message("Organizer profile retrieved successfully")
