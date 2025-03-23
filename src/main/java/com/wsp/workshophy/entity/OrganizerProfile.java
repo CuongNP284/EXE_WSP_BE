@@ -21,7 +21,7 @@ public class OrganizerProfile extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -30,8 +30,8 @@ public class OrganizerProfile extends BaseEntity {
     @Column(name = "theme")
     String theme;
 
-    @Column(name = "follower_count")
-    Integer followerCount;
+    @Column(name = "follower_count", nullable = false)
+    Integer followerCount = 0;
 
     @Column(name = "workshop_count")
     Integer workshopCount;

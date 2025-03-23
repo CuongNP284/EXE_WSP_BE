@@ -1,6 +1,7 @@
 package com.wsp.workshophy.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -51,4 +52,15 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     OrganizerProfile organizerProfile;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_following",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    Set<User> following = new HashSet<>(); // Danh sách các user mà user hiện tại đang theo dõi
+
+    @ManyToMany(mappedBy = "following")
+    Set<User> followers = new HashSet<>(); // Danh sách các user đang theo dõi user hiện tại
 }

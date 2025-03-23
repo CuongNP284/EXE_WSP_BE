@@ -88,6 +88,13 @@ public class OrganizerProfileService {
         return organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
     }
 
+    public List<OrganizerProfileResponse> searchOrganizerProfilesByName(String name) {
+        List<OrganizerProfile> profiles = organizerProfileRepository.findByNameContainingIgnoreCaseAndActive(name, true);
+        return profiles.stream()
+                .map(organizerProfileMapper::toOrganizerProfileResponse)
+                .collect(Collectors.toList());
+    }
+
 
     public List<OrganizerProfileResponse> getAllOrganizerProfiles() {
         return organizerProfileRepository.findAllByActive(true).stream()

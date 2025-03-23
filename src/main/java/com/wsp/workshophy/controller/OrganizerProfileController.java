@@ -66,6 +66,15 @@ public class OrganizerProfileController {
                 .build();
     }
 
+    @GetMapping("/searchByName")
+    public ApiResponse<List<OrganizerProfileResponse>> searchOrganizerProfilesByName(@RequestParam String name) {
+        List<OrganizerProfileResponse> result = organizerProfileService.searchOrganizerProfilesByName(name);
+        return ApiResponse.<List<OrganizerProfileResponse>>builder()
+                .result(result)
+                .message("Organizer profiles retrieved successfully")
+                .build();
+    }
+
     @GetMapping("/my-profile")
     public ApiResponse<OrganizerProfileResponse> getMyOrganizerProfile() {
         OrganizerProfileResponse result = organizerProfileService.getMyOrganizerProfile();

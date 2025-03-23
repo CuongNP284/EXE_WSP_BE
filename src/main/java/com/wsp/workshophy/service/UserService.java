@@ -3,18 +3,15 @@ package com.wsp.workshophy.service;
 import com.wsp.workshophy.constant.PredefinedRole;
 import com.wsp.workshophy.dto.request.User.UserCreationRequest;
 import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
+import com.wsp.workshophy.dto.response.FollowResponse;
+import com.wsp.workshophy.dto.response.FollowerUsernameResponse;
+import com.wsp.workshophy.dto.response.OrganizerProfileNameResponse;
 import com.wsp.workshophy.dto.response.UserResponse;
-import com.wsp.workshophy.entity.Address;
-import com.wsp.workshophy.entity.Role;
-import com.wsp.workshophy.entity.User;
-import com.wsp.workshophy.entity.WorkshopCategory;
+import com.wsp.workshophy.entity.*;
 import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
 import com.wsp.workshophy.mapper.UserMapper;
-import com.wsp.workshophy.repository.AddressRepository;
-import com.wsp.workshophy.repository.RoleRepository;
-import com.wsp.workshophy.repository.UserRepository;
-import com.wsp.workshophy.repository.WorkshopCategoryRepository;
+import com.wsp.workshophy.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -42,6 +39,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     private final WorkshopCategoryRepository workshopCategoryRepository;
+    private final OrganizerProfileRepository organizerProfileRepository;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = initializeNewUser(request);
@@ -165,6 +163,122 @@ public class UserService {
         // Address will be automatically deleted due to cascade = CascadeType.ALL
     }
 
+    public FollowResponse followUser(String userIdToFollow) {
+        User currentUser = getCurrentUser();
+        User userToFollow = findActiveUserById(userIdToFollow);
+
+        // Kiểm tra user hiện tại có phải là CUSTOMER
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            throw new AppException(ErrorCode.NOT_CUSTOMER_TO_FOLLOW);
+        }
+
+        // Kiểm tra user cần theo dõi có phải là ORGANIZER và có OrganizerProfile
+        if (!userToFollow.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE))) {
+            throw new AppException(ErrorCode.USER_NOT_ORGANIZER);
+        }
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByUserAndActive(userToFollow, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        // Kiểm tra xem đã theo dõi chưa
+        if (userRepository.existsByFollowerIdAndFollowingId(currentUser.getId(), userIdToFollow)) {
+            throw new AppException(ErrorCode.ALREADY_FOLLOWED);
+        }
+
+        // Thêm vào danh sách theo dõi
+        currentUser.getFollowing().add(userToFollow);
+        userToFollow.getFollowers().add(currentUser);
+
+        // Tăng followerCount
+        organizerProfile.setFollowerCount(organizerProfile.getFollowerCount() + 1);
+
+        // Lưu thay đổi
+        userRepository.save(currentUser);
+        userRepository.save(userToFollow);
+        organizerProfileRepository.save(organizerProfile);
+
+        return FollowResponse.builder()
+                .followerId(currentUser.getId())
+                .followingId(userIdToFollow)
+                .message("Followed successfully")
+                .build();
+    }
+
+    public FollowResponse unfollowUser(String userIdToUnfollow) {
+        User currentUser = getCurrentUser();
+        User userToUnfollow = findActiveUserById(userIdToUnfollow);
+
+        // Kiểm tra user hiện tại có phải là CUSTOMER
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            throw new AppException(ErrorCode.NOT_CUSTOMER_TO_FOLLOW);
+        }
+
+        // Kiểm tra user cần bỏ theo dõi có phải là ORGANIZER và có OrganizerProfile
+        if (!userToUnfollow.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE))) {
+            throw new AppException(ErrorCode.USER_NOT_ORGANIZER);
+        }
+        OrganizerProfile organizerProfile = organizerProfileRepository.findByUserAndActive(userToUnfollow, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        // Kiểm tra xem có đang theo dõi không
+        if (!userRepository.existsByFollowerIdAndFollowingId(currentUser.getId(), userIdToUnfollow)) {
+            throw new AppException(ErrorCode.NOT_FOLLOWING_YET);
+        }
+
+        // Xóa khỏi danh sách theo dõi
+        currentUser.getFollowing().remove(userToUnfollow);
+        userToUnfollow.getFollowers().remove(currentUser);
+
+        // Giảm followerCount
+        organizerProfile.setFollowerCount(organizerProfile.getFollowerCount() - 1);
+
+        // Lưu thay đổi
+        userRepository.save(currentUser);
+        userRepository.save(userToUnfollow);
+        organizerProfileRepository.save(organizerProfile);
+
+        return FollowResponse.builder()
+                .followerId(currentUser.getId())
+                .followingId(userIdToUnfollow)
+                .message("Unfollowed successfully")
+                .build();
+    }
+
+    public List<OrganizerProfileNameResponse> getFollowedOrganizerProfiles() {
+        User currentUser = getCurrentUser();
+
+        // Kiểm tra user hiện tại có phải là CUSTOMER
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.CUSTOMER_ROLE))) {
+            throw new AppException(ErrorCode.ONLY_CUSTOMER_CAN_VIEW_FOLLOWED_ORGANIZERS);
+        }
+
+        return currentUser.getFollowing().stream()
+                .filter(user -> user.getRoles().stream()
+                        .anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE)))
+                .map(user -> organizerProfileRepository.findByUserAndActive(user, true)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND)))
+                .map(profile -> OrganizerProfileNameResponse.builder()
+                        .name(profile.getName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<FollowerUsernameResponse> getFollowersForOrganizerProfile() {
+        User currentUser = getCurrentUser();
+
+        // Kiểm tra user có phải là ORGANIZER và có OrganizerProfile
+        if (!currentUser.getRoles().stream().anyMatch(role -> role.getName().equals(PredefinedRole.ORGANIZER_ROLE))) {
+            throw new AppException(ErrorCode.USER_NOT_ORGANIZER);
+        }
+        organizerProfileRepository.findByUserAndActive(currentUser, true)
+                .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
+
+        return currentUser.getFollowers().stream()
+                .map(user -> FollowerUsernameResponse.builder()
+                        .username(user.getUsername())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
         log.info("Fetching all active users");
@@ -177,6 +291,15 @@ public class UserService {
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(findActiveUserById(id));
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public List<UserResponse> searchUsersByUsername(String username) {
+
+        List<User> users = userRepository.findByUsernameContainingIgnoreCaseAndActive(username, true);
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     private User initializeNewUser(UserCreationRequest request) {

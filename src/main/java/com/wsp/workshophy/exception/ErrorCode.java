@@ -24,6 +24,10 @@ public enum ErrorCode {
     USER_NOT_ORGANIZER(1014, "User does not have ORGANIZER role", HttpStatus.BAD_REQUEST),
     WORKSHOP_CATEGORY_NOT_FOUND(1015, "Workshop category not found", HttpStatus.NOT_FOUND),
     INVALID_ID_FORMAT(1016, "Invalid ID format", HttpStatus.BAD_REQUEST),
+    NOT_CUSTOMER_TO_FOLLOW(1017, "Only CUSTOMER can follow others", HttpStatus.BAD_REQUEST),
+    ALREADY_FOLLOWED(1018, "You have already followed this user", HttpStatus.BAD_REQUEST),
+    NOT_FOLLOWING_YET(1019, "You have not followed this user yet", HttpStatus.BAD_REQUEST),
+    ONLY_CUSTOMER_CAN_VIEW_FOLLOWED_ORGANIZERS(1020, "Only CUSTOMER can view followed organizers", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

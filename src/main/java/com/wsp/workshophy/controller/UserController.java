@@ -2,6 +2,9 @@ package com.wsp.workshophy.controller;
 
 import java.util.List;
 
+import com.wsp.workshophy.dto.response.FollowResponse;
+import com.wsp.workshophy.dto.response.FollowerUsernameResponse;
+import com.wsp.workshophy.dto.response.OrganizerProfileNameResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
@@ -79,6 +82,53 @@ public class UserController {
         return ApiResponse.<UserResponse>builder()
                 .message("User updated successfully")
                 .result(userService.updateUser(userId, request))
+                .build();
+    }
+
+    @PostMapping("/{userId}/follow")
+    public ApiResponse<FollowResponse> followUser(@PathVariable String userId) {
+        FollowResponse result = userService.followUser(userId);
+        return ApiResponse.<FollowResponse>builder()
+                .result(result)
+                .message(result.getMessage())
+                .build();
+    }
+
+    @PostMapping("/{userId}/unfollow")
+    public ApiResponse<FollowResponse> unfollowUser(@PathVariable String userId) {
+        FollowResponse result = userService.unfollowUser(userId);
+        return ApiResponse.<FollowResponse>builder()
+                .result(result)
+                .message(result.getMessage())
+                .build();
+    }
+
+    @GetMapping("/my-followed-organizers")
+    //For Customer
+    public ApiResponse<List<OrganizerProfileNameResponse>> getFollowedOrganizerProfiles() {
+        List<OrganizerProfileNameResponse> result = userService.getFollowedOrganizerProfiles();
+        return ApiResponse.<List<OrganizerProfileNameResponse>>builder()
+                .result(result)
+                .message("Followed organizer profiles retrieved successfully")
+                .build();
+    }
+
+    //For Organizer
+    @GetMapping("/my-followers")
+    public ApiResponse<List<FollowerUsernameResponse>> getFollowersForOrganizerProfile() {
+        List<FollowerUsernameResponse> result = userService.getFollowersForOrganizerProfile();
+        return ApiResponse.<List<FollowerUsernameResponse>>builder()
+                .result(result)
+                .message("Followers retrieved successfully")
+                .build();
+    }
+
+    @GetMapping("/searchUserByName")
+    public ApiResponse<List<UserResponse>> searchUsersByUsername(@RequestParam String username) {
+        List<UserResponse> result = userService.searchUsersByUsername(username);
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(result)
+                .message("Users retrieved successfully")
                 .build();
     }
 }

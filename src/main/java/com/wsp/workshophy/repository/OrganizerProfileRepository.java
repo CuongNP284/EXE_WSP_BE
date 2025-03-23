@@ -19,4 +19,6 @@ public interface OrganizerProfileRepository extends JpaRepository<OrganizerProfi
     Optional<OrganizerProfile> findByUserAndActive(User user, Boolean active);
 
     Optional<OrganizerProfile> findByUserIdAndActive(String userId, Boolean active);
+
+    List<OrganizerProfile> findByNameContainingIgnoreCaseAndActive(String name, Boolean active);
 }
