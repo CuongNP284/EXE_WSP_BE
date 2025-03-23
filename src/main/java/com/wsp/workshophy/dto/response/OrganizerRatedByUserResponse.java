@@ -3,6 +3,8 @@ package com.wsp.workshophy.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,4 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class OrganizerRatedByUserResponse {
     String username;
     Double rating;
+    String comment;
+    LocalDateTime createdDate;
 }

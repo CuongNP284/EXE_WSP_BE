@@ -4,13 +4,16 @@ import com.wsp.workshophy.constant.PredefinedRole;
 import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileCreationRequest;
 import com.wsp.workshophy.dto.request.OrganizerProfile.OrganizerProfileUpdateRequest;
 import com.wsp.workshophy.dto.response.OrganizerProfileResponse;
+import com.wsp.workshophy.dto.response.OrganizerRatedByUserResponse;
 import com.wsp.workshophy.entity.OrganizerProfile;
+import com.wsp.workshophy.entity.Rating;
 import com.wsp.workshophy.entity.User;
 import com.wsp.workshophy.entity.WorkshopCategory;
 import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
 import com.wsp.workshophy.mapper.OrganizerProfileMapper;
 import com.wsp.workshophy.repository.OrganizerProfileRepository;
+import com.wsp.workshophy.repository.RatingRepository;
 import com.wsp.workshophy.repository.UserRepository;
 import com.wsp.workshophy.repository.WorkshopCategoryRepository;
 import lombok.AccessLevel;
@@ -33,6 +36,7 @@ public class OrganizerProfileService {
     UserRepository userRepository;
     WorkshopCategoryRepository workshopCategoryRepository;
     OrganizerProfileMapper organizerProfileMapper;
+    RatingRepository ratingRepository;
 
     public OrganizerProfileResponse createOrganizerProfile(OrganizerProfileCreationRequest request) {
         User user = getCurrentUser();
@@ -103,6 +107,7 @@ public class OrganizerProfileService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     public OrganizerProfileResponse getOrganizerProfileForUser(Long id) {
         // Tìm OrganizerProfile theo id
         OrganizerProfile organizerProfile = organizerProfileRepository.findByIdAndActive(id, true)
@@ -120,12 +125,49 @@ public class OrganizerProfileService {
         // Gán danh sách liên quan vào response
         response.setRelatedProfiles(relatedProfileResponses);
 
+        // Lấy danh sách ratings của OrganizerProfile
+        List<Rating> ratings = ratingRepository.findByOrganizerProfile(organizerProfile);
+        List<OrganizerRatedByUserResponse> ratingResponses = ratings.stream()
+                .map(rating -> OrganizerRatedByUserResponse.builder()
+                        .username(rating.getUser().getUsername())
+                        .rating(rating.getRating())
+                        .comment(rating.getComment())
+                        .createdDate(rating.getCreatedDate())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Gán danh sách ratings vào response
+        response.setRatings(ratingResponses);
+
         return response;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
     public OrganizerProfileResponse getOrganizerProfile(Long id) {
+// Tìm OrganizerProfile theo id
         OrganizerProfile organizerProfile = findOrganizerProfileByIdAndActive(id);
-        return organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
+
+        // Chuyển đổi sang OrganizerProfileResponse
+        OrganizerProfileResponse response = organizerProfileMapper.toOrganizerProfileResponse(organizerProfile);
+
+        // Lấy danh sách ratings của OrganizerProfile
+        List<Rating> ratings = ratingRepository.findByOrganizerProfile(organizerProfile);
+        List<OrganizerRatedByUserResponse> ratingResponses = ratings.stream()
+                .map(rating -> OrganizerRatedByUserResponse.builder()
+                        .username(rating.getUser().getUsername())
+                        .rating(rating.getRating())
+                        .comment(rating.getComment())
+                        .createdDate(rating.getCreatedDate())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Gán danh sách ratings vào response
+        response.setRatings(ratingResponses);
+
+        // Không lấy relatedProfiles trong API này
+        response.setRelatedProfiles(null);
+
+        return response;
     }
 
     public OrganizerProfileResponse getMyOrganizerProfile() {

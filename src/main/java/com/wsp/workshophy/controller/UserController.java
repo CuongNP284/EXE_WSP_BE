@@ -2,6 +2,7 @@ package com.wsp.workshophy.controller;
 
 import java.util.List;
 
+import com.wsp.workshophy.dto.request.RateOrganizerRequest;
 import com.wsp.workshophy.dto.response.*;
 import jakarta.validation.Valid;
 
@@ -130,8 +131,8 @@ public class UserController {
     }
 
     @PostMapping("/{organizerUserId}/rate")
-    public ApiResponse<RatingResponse> rateOrganizerProfile(@PathVariable String organizerUserId, @RequestParam Double rating) {
-        RatingResponse result = userService.rateOrganizerProfile(organizerUserId, rating);
+    public ApiResponse<RatingResponse> rateOrganizerProfile(@PathVariable String organizerUserId, @RequestBody RateOrganizerRequest request) {
+        RatingResponse result = userService.rateOrganizerProfile(organizerUserId, request);
         return ApiResponse.<RatingResponse>builder()
                 .result(result)
                 .message("Organizer profile rated successfully")

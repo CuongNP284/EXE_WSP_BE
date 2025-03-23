@@ -23,6 +23,8 @@ public interface OrganizerProfileMapper {
     @Mapping(source = "categories", target = "categoryNames", qualifiedByName = "mapCategoriesToNames")
     @Mapping(source = "establishmentDate", target = "tenure", qualifiedByName = "calculateTenure")
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(target = "relatedProfiles", ignore = true) // Bỏ qua relatedProfiles trong ánh xạ
+    @Mapping(target = "ratings", ignore = true) // Bỏ qua ratings trong ánh xạ
     OrganizerProfileResponse toOrganizerProfileResponse(OrganizerProfile organizerProfile);
 
 

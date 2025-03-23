@@ -30,4 +30,7 @@ public class Rating extends BaseEntity {
 
     @Column(name = "rating", nullable = false)
     Double rating;
+
+    @Column(name = "comment", columnDefinition = "TEXT")
+    String comment;
 }

@@ -29,5 +29,6 @@ public class OrganizerProfileResponse extends BaseRepsonse {
     LocalDate establishmentDate;
     String tenure;
     List<OrganizerProfileResponse> relatedProfiles;
+    List<OrganizerRatedByUserResponse> ratings;
     String userId;
 }

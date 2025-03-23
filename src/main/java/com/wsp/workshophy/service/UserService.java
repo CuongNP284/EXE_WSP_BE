@@ -1,6 +1,7 @@
 package com.wsp.workshophy.service;
 
 import com.wsp.workshophy.constant.PredefinedRole;
+import com.wsp.workshophy.dto.request.RateOrganizerRequest;
 import com.wsp.workshophy.dto.request.User.UserCreationRequest;
 import com.wsp.workshophy.dto.request.User.UserUpdateRequest;
 import com.wsp.workshophy.dto.response.*;
@@ -321,7 +322,7 @@ public class UserService {
         return user;
     }
 
-    public RatingResponse rateOrganizerProfile(String organizerUserId, Double rating) {
+    public RatingResponse rateOrganizerProfile(String organizerUserId, RateOrganizerRequest request) {
         User currentUser = getCurrentUser();
 
         // Kiểm tra user hiện tại có phải là CUSTOMER
@@ -338,25 +339,25 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORGANIZER_PROFILE_NOT_FOUND));
 
         // Kiểm tra rating hợp lệ (1-5)
-        if (rating < 1.0 || rating > 5.0) {
+        if (request.getRating() < 1.0 || request.getRating() > 5.0) {
             throw new AppException(ErrorCode.INVALID_RATING);
         }
 
         // Kiểm tra xem user đã đánh giá OrganizerProfile này chưa
-        Optional<Rating> existingRating = ratingRepository.findByUserAndOrganizerProfile(currentUser, organizerProfile);
-        Rating ratingEntity;
-        String message;
+        Optional<Rating> existingRating = ratingRepository.findByUserAndOrganizerProfile(currentUser, organizerProfile);        Rating ratingEntity;
 
         if (existingRating.isPresent()) {
             // Nếu đã đánh giá, cập nhật rating mới
             ratingEntity = existingRating.get();
-            ratingEntity.setRating(rating);
+            ratingEntity.setRating(request.getRating());
+            ratingEntity.setComment(request.getComment());
         } else {
             // Nếu chưa đánh giá, tạo rating mới
             ratingEntity = Rating.builder()
                     .user(currentUser)
                     .organizerProfile(organizerProfile)
-                    .rating(rating)
+                    .rating(request.getRating())
+                    .comment(request.getComment())
                     .build();
             organizerProfile.getRatings().add(ratingEntity);
         }
@@ -372,7 +373,9 @@ public class UserService {
                 .username(currentUser.getUsername())
                 .organizerProfileId(organizerProfile.getId())
                 .organizerProfileName(organizerProfile.getName())
-                .rating(rating)
+                .rating(ratingEntity.getRating())
+                .createdDate(ratingEntity.getCreatedDate())
+                .comment(ratingEntity.getComment())
                 .build();
     }
 
@@ -390,6 +393,8 @@ public class UserService {
                         .organizerProfileId(rating.getOrganizerProfile().getId())
                         .organizerProfileName(rating.getOrganizerProfile().getName())
                         .rating(rating.getRating())
+                        .comment(rating.getComment())
+                        .createdDate(rating.getCreatedDate())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -407,8 +412,10 @@ public class UserService {
         List<Rating> ratings = ratingRepository.findByOrganizerProfile(organizerProfile);
         return ratings.stream()
                 .map(rating -> OrganizerRatedByUserResponse.builder()
-                        .username(rating.getUser().getUsername()) // Thay userId bằng username
+                        .username(rating.getUser().getUsername())
                         .rating(rating.getRating())
+                        .comment(rating.getComment())
+                        .createdDate(rating.getCreatedDate())
                         .build())
                 .collect(Collectors.toList());
     }
