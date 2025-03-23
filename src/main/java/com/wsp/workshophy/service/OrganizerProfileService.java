@@ -45,6 +45,9 @@ public class OrganizerProfileService {
 
         OrganizerProfile organizerProfile = organizerProfileMapper.toOrganizerProfile(request);
         organizerProfile.setUser(user);
+        organizerProfile.setCreatedDate(organizerProfile.getCreatedDate());
+        organizerProfile.setFollowerCount(0);
+        organizerProfile.setWorkshopCount(0);
 
         // Lấy danh sách WorkshopCategory từ categoryNames
         List<WorkshopCategory> categories = request.getCategoryNames().stream()
@@ -66,6 +69,7 @@ public class OrganizerProfileService {
         Optional.ofNullable(request.getTheme()).ifPresent(organizerProfile::setTheme);
         Optional.ofNullable(request.getFollowerCount()).ifPresent(organizerProfile::setFollowerCount);
         Optional.ofNullable(request.getWorkshopCount()).ifPresent(organizerProfile::setWorkshopCount);
+        Optional.ofNullable(request.getEstablishmentDate()).ifPresent(organizerProfile::setEstablishmentDate);
 
         // Cập nhật danh sách WorkshopCategory nếu có
         Optional.ofNullable(request.getCategoryNames()).ifPresent(categoryNames -> {

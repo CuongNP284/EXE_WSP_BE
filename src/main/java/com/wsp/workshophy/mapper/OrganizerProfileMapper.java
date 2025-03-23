@@ -11,6 +11,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -21,15 +23,27 @@ public interface OrganizerProfileMapper {
 
     @Mapping(source = "user.username", target = "username")
     @Mapping(source = "categories", target = "categoryNames", qualifiedByName = "mapCategoriesToNames")
+    @Mapping(source = "establishmentDate", target = "tenure", qualifiedByName = "calculateTenure")
     OrganizerProfileResponse toOrganizerProfileResponse(OrganizerProfile organizerProfile);
 
-    @Mapping(target = "categories", ignore = true)
-    void updateOrganizerProfileFromRequest(OrganizerProfileUpdateRequest request, @MappingTarget OrganizerProfile organizerProfile);
 
     @Named("mapCategoriesToNames")
     default List<String> mapCategoriesToNames(List<WorkshopCategory> categories) {
         return categories.stream()
                 .map(WorkshopCategory::getName)
                 .toList();
+    }
+
+    @Named("calculateTenure")
+    default String calculateTenure(LocalDate establishmentDate) {
+        if (establishmentDate == null) {
+            return "0 năm, 0 tháng, 0 ngày";
+        }
+        LocalDate currentDate = LocalDate.now(); // Sử dụng ngày hiện tại thực tế
+        Period period = Period.between(establishmentDate, currentDate);
+        int years = period.getYears();
+        int months = period.getMonths();
+        int days = period.getDays();
+        return String.format("%d năm, %d tháng, %d ngày", years, months, days);
     }
 }

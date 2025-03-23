@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -34,6 +35,9 @@ public class OrganizerProfile extends BaseEntity {
 
     @Column(name = "workshop_count")
     Integer workshopCount;
+
+    @Column(name = "establishment_date")
+    LocalDate establishmentDate;
 
     @ManyToMany
     @JoinTable(

@@ -4,6 +4,7 @@ import com.wsp.workshophy.base.BaseRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -19,4 +20,5 @@ public class OrganizerProfileCreationRequest extends BaseRequest {
     Integer followerCount;
     Integer workshopCount;
     List<String> categoryNames;
+    LocalDate establishmentDate;
 }
