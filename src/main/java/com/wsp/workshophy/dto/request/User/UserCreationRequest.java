@@ -1,6 +1,7 @@
 package com.wsp.workshophy.dto.request.User;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.wsp.workshophy.base.BaseRequest;
 import com.wsp.workshophy.dto.request.RoleRequest;
@@ -42,6 +43,6 @@ public class UserCreationRequest extends BaseRequest {
     String city;
     String district;
     String ward;
-
     RoleRequest role;
+    List<String> interestNames;
 }

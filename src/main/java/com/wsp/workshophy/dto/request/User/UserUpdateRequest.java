@@ -29,4 +29,5 @@ public class UserUpdateRequest extends BaseRequest {
     String ward;
 
     List<String> roles;
+    List<String> interestNames;
 }

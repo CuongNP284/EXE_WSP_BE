@@ -1,6 +1,7 @@
 package com.wsp.workshophy.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import com.wsp.workshophy.base.BaseEntity;
@@ -39,6 +40,14 @@ public class User extends BaseEntity {
 
     @ManyToMany
     Set<Role> roles;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_interests",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    List<WorkshopCategory> interests;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     OrganizerProfile organizerProfile;

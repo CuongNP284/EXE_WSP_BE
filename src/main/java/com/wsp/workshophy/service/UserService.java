@@ -7,12 +7,14 @@ import com.wsp.workshophy.dto.response.UserResponse;
 import com.wsp.workshophy.entity.Address;
 import com.wsp.workshophy.entity.Role;
 import com.wsp.workshophy.entity.User;
+import com.wsp.workshophy.entity.WorkshopCategory;
 import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
 import com.wsp.workshophy.mapper.UserMapper;
 import com.wsp.workshophy.repository.AddressRepository;
 import com.wsp.workshophy.repository.RoleRepository;
 import com.wsp.workshophy.repository.UserRepository;
+import com.wsp.workshophy.repository.WorkshopCategoryRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +37,10 @@ import java.util.List;
 @Slf4j
 public class UserService {
     UserRepository userRepository;
-    AddressRepository addressRepository;
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    private final WorkshopCategoryRepository workshopCategoryRepository;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = initializeNewUser(request);
@@ -65,12 +69,22 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PostAuthorize("returnObject.username == authentication.name or hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = findActiveUserById(userId);
 
-        // Update user basic fields
-        userMapper.updateUserFromRequest(request, user);
+        User currentUser = getCurrentUser();
+        log.info("Current user: {}", currentUser.getEmail());
+        log.info("Updating user: {}", user.getEmail());
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && !currentUser.getEmail().equals(user.getEmail())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Update basic fields if present
+        updateIfPresent(request.getFirstName(), user::setFirstName);
+        updateIfPresent(request.getLastName(), user::setLastName);
+        updateIfPresent(request.getDob(), user::setDob);
 
         // Update password if present
         updateIfPresent(request.getPassword(),
@@ -88,9 +102,19 @@ public class UserService {
         updateIfPresent(request.getWard(), address::setWard);
 
         // Update roles if present
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            user.setRoles(new HashSet<>(roleRepository.findAllById(request.getRoles())));
-        }
+        Optional.ofNullable(request.getRoles())
+                .filter(roles -> !roles.isEmpty())
+                .ifPresent(roles -> user.setRoles(new HashSet<>(roleRepository.findAllById(roles))));
+
+        // Update interests if present
+        Optional.ofNullable(request.getInterestNames())
+                .filter(names -> !names.isEmpty())
+                .ifPresent(names -> {
+                    List<WorkshopCategory> interests = names.stream()
+                            .map(this::findWorkshopCategoryByNameAndActive)
+                            .collect(Collectors.toList());
+                    user.setInterests(interests);
+                });
 
         return saveAndMapUser(user);
     }
@@ -126,6 +150,12 @@ public class UserService {
         roleRepository.findById(roleName).ifPresent(roles::add);
         user.setRoles(roles);
 
+        // Xử lý sở thích (interests)
+        List<WorkshopCategory> interests = request.getInterestNames().stream()
+                .map(this::findWorkshopCategoryByNameAndActive)
+                .collect(Collectors.toList());
+        user.setInterests(interests);
+
         return user;
     }
 
@@ -142,6 +172,11 @@ public class UserService {
     private User findActiveUserById(String userId) {
         return userRepository.findByIdAndActive(userId, true)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    private WorkshopCategory findWorkshopCategoryByNameAndActive(String name) {
+        return workshopCategoryRepository.findByNameAndActive(name, true)
+                .orElseThrow(() -> new AppException(ErrorCode.WORKSHOP_CATEGORY_NOT_FOUND));
     }
 
     private User findActiveUserByEmail(String email) {
@@ -162,5 +197,11 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmailAndActive(email, true)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 }

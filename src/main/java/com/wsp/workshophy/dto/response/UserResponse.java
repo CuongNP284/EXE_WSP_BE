@@ -1,6 +1,7 @@
 package com.wsp.workshophy.dto.response;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import com.wsp.workshophy.base.BaseRepsonse;
@@ -25,4 +26,5 @@ public class UserResponse{
     String district;
     String ward;
     Set<RoleResponse> roles;
+    List<String> interestNames;
 }

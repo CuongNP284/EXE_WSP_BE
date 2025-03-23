@@ -26,4 +26,7 @@ public class WorkshopCategory extends BaseEntity {
     @ManyToMany(mappedBy = "categories")
     List<OrganizerProfile> organizerProfiles;
 
+    @ManyToMany(mappedBy = "interests")
+    List<User> users;
+
 }
