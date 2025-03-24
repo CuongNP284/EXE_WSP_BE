@@ -31,6 +31,8 @@ public enum ErrorCode {
     NOT_CUSTOMER_TO_RATE(1021, "Only CUSTOMER can rate organizers", HttpStatus.BAD_REQUEST),
     INVALID_RATING(1022, "Rating must be between 1.0 and 5.0", HttpStatus.BAD_REQUEST),
     NOT_CUSTOMER_TO_VIEW_RATED(1023, "Only CUSTOMER can view rated organizers", HttpStatus.BAD_REQUEST),
+    ADVERTISEMENT_NOT_FOUND(1024, "Advertisement not found", HttpStatus.NOT_FOUND),
+    INVALID_STATUS(1025, "Invalid status", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
