@@ -4,12 +4,17 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.StringJoiner;
 import java.util.UUID;
 
+import com.wsp.workshophy.constant.PredefinedRole;
+import com.wsp.workshophy.entity.Role;
+import com.wsp.workshophy.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -44,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+    private final RoleRepository roleRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -82,6 +88,42 @@ public class AuthenticationService {
 
         var token = generateToken(user);
 
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
+    public AuthenticationResponse loginRegisterByGoogleOAuth2(OAuth2AuthenticationToken auth2AuthenticationToken) {
+        String email = auth2AuthenticationToken.getPrincipal().getAttribute("email");
+        String name = auth2AuthenticationToken.getPrincipal().getAttribute("name");
+        String picture = auth2AuthenticationToken.getPrincipal().getAttribute("picture");
+
+        log.info("Email: " + email);
+        log.info("Name: " + name);
+        log.info("Picture: " + picture);
+
+        HashSet<Role> roles = new HashSet<>();
+        roleRepository.findById(PredefinedRole.CUSTOMER_ROLE).ifPresent(roles::add);
+
+        // Kiểm tra xem user đã tồn tại trong hệ thống chưa
+        User user = userRepository.findByEmailAndActive(email, true).orElse(null);
+        if (user == null) {
+            new User();
+            assert name != null;
+            User newUser = User.builder()
+                    .email(email)
+                    .username(email)
+                    .firstName(name.split(" ")[0])
+                    .lastName(name.split(" ").length > 1 ? name.split(" ")[1] : "")
+                    .avatar(picture)
+                    .roles(roles)
+                    .build();
+
+            userRepository.save(newUser);
+            var token = generateToken(newUser);
+            log.info("Token: " + token);
+            return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        }
+        var token = generateToken(user);
+        log.info("Token: " + token);
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
@@ -155,11 +197,11 @@ public class AuthenticationService {
 
         Date expiryTime = (isRefresh)
                 ? new Date(signedJWT
-                        .getJWTClaimsSet()
-                        .getIssueTime()
-                        .toInstant()
-                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
-                        .toEpochMilli())
+                .getJWTClaimsSet()
+                .getIssueTime()
+                .toInstant()
+                .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
