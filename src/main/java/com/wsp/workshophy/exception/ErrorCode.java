@@ -33,6 +33,8 @@ public enum ErrorCode {
     NOT_CUSTOMER_TO_VIEW_RATED(1023, "Only CUSTOMER can view rated organizers", HttpStatus.BAD_REQUEST),
     ADVERTISEMENT_NOT_FOUND(1024, "Advertisement not found", HttpStatus.NOT_FOUND),
     INVALID_STATUS(1025, "Invalid status", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1026, "Invalid OTP", HttpStatus.BAD_REQUEST),
+    EMAIL_SENDING_FAILED(1027, "Email sending failed", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -20,11 +20,23 @@ spring:
             client-secret: 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
             scope: profile,email
             redirect-uri: http://localhost:8080/login/oauth2/code/google
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: phucuong479@gmail.com # Thay bằng email của bạn
+    password: sols oqyo ypjv gmru # Thay bằng App Password của Gmail
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
   valid-duration: 3600 # in second
   refreshable-duration: 36000 # in seconds
-springdoc:
-  swagger-ui:
-    oauth2-redirect-url:
+
+otp:
+  expiration: 300
+

@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    private final RoleRepository roleRepository;
+    RoleRepository roleRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
