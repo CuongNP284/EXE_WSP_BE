@@ -10,6 +10,7 @@ import com.wsp.workshophy.exception.AppException;
 import com.wsp.workshophy.exception.ErrorCode;
 import com.wsp.workshophy.mapper.UserMapper;
 import com.wsp.workshophy.repository.*;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +36,7 @@ public class UserService {
     WorkshopCategoryRepository workshopCategoryRepository;
     OrganizerProfileRepository organizerProfileRepository;
     RatingRepository ratingRepository;
+    EmailService emailService;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = initializeNewUser(request);
@@ -52,6 +54,136 @@ public class UserService {
             return saveAndMapUser(user);
         } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
+        }
+    }
+
+    public UserResponse registerCustomer(UserCreationRequest request) {
+        User user = initializeNewUser(request);
+
+        // Create and set address
+        Address address = Address.builder()
+                .street(request.getStreet())
+                .city(request.getCity())
+                .district(request.getDistrict())
+                .ward(request.getWard())
+                .build();
+        user.setAddress(address);
+
+        // Tạo verification token
+        String verificationToken = generateCodeToVerifyEmail();
+        user.setVerificationToken(verificationToken);
+        user.setEmailVerified(false);
+
+        try {
+            User savedUser = userRepository.save(user);
+
+            // Gửi email xác thực
+            emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getFirstName() + " " + savedUser.getLastName(), verificationToken);
+
+            return userMapper.toUserResponse(savedUser);
+        } catch (DataIntegrityViolationException exception) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED);
+        }
+    }
+
+    public UserResponse registerOrganizer(UserCreationRequest request) {
+        User user = initializeNewUser(request);
+
+        // Create and set address
+        Address address = Address.builder()
+                .street(request.getStreet())
+                .city(request.getCity())
+                .district(request.getDistrict())
+                .ward(request.getWard())
+                .build();
+        user.setAddress(address);
+
+        // Tạo verification token
+        String verificationToken = generateCodeToVerifyEmail();
+        user.setVerificationToken(verificationToken);
+        user.setEmailVerified(false);
+
+        try {
+            User savedUser = userRepository.save(user);
+
+            // Gửi email xác thực
+            emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getFirstName() + " " + savedUser.getLastName(), verificationToken);
+
+            return userMapper.toUserResponse(savedUser);
+        } catch (DataIntegrityViolationException exception) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED);
+        }
+    }
+
+    // Tạo mã OTP ngẫu nhiên (6 chữ số)
+    private String generateCodeToVerifyEmail() {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // Tạo số ngẫu nhiên 6 chữ số
+        return String.valueOf(otp);
+    }
+
+    public void verifyEmailForCustomer(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_VERIFICATION_TOKEN));
+
+        if (user.isEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null); // Xóa token sau khi xác thực
+        userRepository.save(user);
+
+        // Gửi email chào mừng
+        try {
+            emailService.sendWelcomeEmailForCustomer(user.getEmail(), user.getFirstName() + " " + user.getLastName());
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED);
+        }
+    }
+
+    public void verifyEmailForOrganizer(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_VERIFICATION_TOKEN));
+
+        if (user.isEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null); // Xóa token sau khi xác thực
+        userRepository.save(user);
+
+        // Gửi email chào mừng
+        try {
+            emailService.sendWelcomeEmailForOrganizer(user.getEmail(), user.getFirstName() + " " + user.getLastName());
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED);
+        }
+    }
+
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmailAndActive(email, true)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (user.isEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
+
+        // Tạo token mới
+        String newVerificationToken = generateCodeToVerifyEmail();
+        user.setVerificationToken(newVerificationToken);
+        userRepository.save(user);
+
+        // Gửi email với token mới
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), user.getFirstName() + " " + user.getLastName(), newVerificationToken);
+        } catch (MessagingException e) {
+            throw new AppException(ErrorCode.EMAIL_SENDING_FAILED);
         }
     }
 

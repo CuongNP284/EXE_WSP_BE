@@ -70,4 +70,11 @@ public class User extends BaseEntity {
 
     @ManyToMany(mappedBy = "following")
     Set<User> followers = new HashSet<>(); // Danh sách các user đang theo dõi user hiện tại
+
+    // Thêm các trường cho xác thực email
+    @Column(name = "verification_token")
+    String verificationToken;
+
+    @Column(name = "email_verified")
+    boolean emailVerified;
 }

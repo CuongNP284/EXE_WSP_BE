@@ -35,6 +35,9 @@ public enum ErrorCode {
     INVALID_STATUS(1025, "Invalid status", HttpStatus.BAD_REQUEST),
     INVALID_OTP(1026, "Invalid OTP", HttpStatus.BAD_REQUEST),
     EMAIL_SENDING_FAILED(1027, "Email sending failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_VERIFICATION_TOKEN(1028, "Invalid verification token", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_VERIFIED(1029, "Email already verified", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED(1030, "Email not verified", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -87,6 +87,7 @@ public class ApplicationInitConfig {
                         .firstName("admin")
                         .roles(roles)
                         .address(adminAddress) // Gắn Address vào User
+                        .emailVerified(true)
                         .build();
 
                 userRepository.save(admin);
@@ -121,6 +122,7 @@ public class ApplicationInitConfig {
                         .dob(java.time.LocalDate.parse("2004-08-02"))
                         .roles(roles)
                         .address(customerAddress) // Gắn Address vào User
+                        .emailVerified(true)
                         .build();
 
                 userRepository.save(customer);
@@ -155,6 +157,7 @@ public class ApplicationInitConfig {
                         .dob(java.time.LocalDate.parse("2004-08-02"))
                         .roles(roles)
                         .address(organizerAddress) // Gắn Address vào User
+                        .emailVerified(true)
                         .build();
 
                 userRepository.save(organizer);

@@ -41,7 +41,6 @@ public class GoogleController {
     @GetMapping("/loginFailure")
     public ResponseEntity<AuthenticationResponse> handleGoogleFailure(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
         log.error("Google login failed for user: {}", Optional.ofNullable(oAuth2AuthenticationToken.getPrincipal().getAttribute("email")));
-        AuthenticationResponse response = authenticationService.loginRegisterByGoogleOAuth2(oAuth2AuthenticationToken);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).location(URI.create("https://www.google.com.vn/")).build();
     }
 }

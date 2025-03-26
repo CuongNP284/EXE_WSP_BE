@@ -17,7 +17,6 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -113,15 +112,15 @@ public class PasswordResetService {
         // Cá nhân hóa thông điệp với HTML
         String htmlContent = "<html>" +
                 "<body style='font-family: Arial, sans-serif; color: #333;'>" +
-                "<h2>Password Reset Request</h2>" +
-                "<p>Dear " + (firstName != null && !firstName.isEmpty() ? firstName : "User") + ",</p>" +
-                "<p>We have received a request to reset the password for your Workshophy account. To proceed, please use the following One-Time Password (OTP):</p>" +
-                "<h3 style='color: #4285F4;'>Your OTP: <strong>" + otpCode + "</strong></h3>" +
-                "<p>This OTP is valid for <strong>" + (otpExpiration / 60) + " minutes</strong> only. Please enter this code in the password reset form to continue the process.</p>" +
-                "<p>If you did not initiate this request, please ignore this email or contact our support team immediately at <a href='mailto:support@workshophy.com'>support@workshophy.com</a> to secure your account.</p>" +
-                "<p>For your security, do not share this OTP with anyone. If you need further assistance, feel free to reach out to us.</p>" +
-                "<p>Thank you for choosing Workshophy!</p>" +
-                "<p>Best regards,<br><strong>The Workshophy Team</strong></p>" +
+                "<h2>Yêu Cầu Đặt Lại Mật Khẩu</h2>" +
+                "<p>Xin chào " + (firstName != null && !firstName.isEmpty() ? firstName : "bạn") + ",</p>" +
+                "<p>Chúng mình vừa nhận được yêu cầu đặt lại mật khẩu cho tài khoản Workshophy của bạn. Để tiếp tục, bạn hãy sử dụng Mã Xác Nhận Một Lần (OTP) sau đây nhé:</p>" +
+                "<h3 style='color: #4285F4;'>Mã OTP của bạn: <strong>" + otpCode + "</strong></h3>" +
+                "<p>Mã OTP này chỉ có hiệu lực trong <strong>" + (otpExpiration / 60) + " phút</strong> thôi. Bạn hãy nhập mã này vào biểu mẫu đặt lại mật khẩu để tiếp tục nha.</p>" +
+                "<p>Nếu bạn không thực hiện yêu cầu này, bạn có thể bỏ qua email này hoặc liên hệ ngay với đội ngũ hỗ trợ của chúng mình qua <a href='mailto:support@workshophy.com'>support@workshophy.com</a> để bảo vệ tài khoản của bạn.</p>" +
+                "<p>Để đảm bảo an toàn, bạn đừng chia sẻ mã OTP này với bất kỳ ai nhé. Nếu bạn cần hỗ trợ thêm, cứ liên hệ với chúng mình bất cứ lúc nào!</p>" +
+                "<p>Cảm ơn bạn đã chọn Workshophy!</p>" +
+                "<p>Thân ái,<br><strong>Đội ngũ Workshophy</strong></p>" +
                 "</body>" +
                 "</html>";
 

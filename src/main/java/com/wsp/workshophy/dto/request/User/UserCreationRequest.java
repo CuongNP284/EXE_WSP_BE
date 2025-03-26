@@ -26,7 +26,6 @@ public class UserCreationRequest extends BaseRequest {
     String username;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
     String email;
 
     @Size(min = 8, max = 20, message = "INVALID_PASSWORD")

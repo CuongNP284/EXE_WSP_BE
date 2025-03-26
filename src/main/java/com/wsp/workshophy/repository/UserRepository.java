@@ -26,4 +26,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByFollowerIdAndFollowingId(@Param("followerId") String followerId, @Param("followingId") String followingId);
 
     List<User> findByUsernameContainingIgnoreCaseAndActive(String username, Boolean active);
+
+    Optional<User> findByVerificationToken(String token);
 }

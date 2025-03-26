@@ -77,10 +77,16 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         var user = userRepository
                 .findByUsernameAndActive(request.getUsername(), true)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Kiểm tra xem email đã được xác thực chưa
+        if (!user.isEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
@@ -114,6 +120,8 @@ public class AuthenticationService {
                     .firstName(name.split(" ")[0])
                     .lastName(name.split(" ").length > 1 ? name.split(" ")[1] : "")
                     .avatar(picture)
+                    .emailVerified(true)
+                    .verificationToken(null)
                     .roles(roles)
                     .build();
 
@@ -122,6 +130,12 @@ public class AuthenticationService {
             log.info("Token: " + token);
             return AuthenticationResponse.builder().token(token).authenticated(true).build();
         }
+
+        // Kiểm tra xem email đã được xác thực chưa
+        if (!user.isEmailVerified()) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
         var token = generateToken(user);
         log.info("Token: " + token);
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
